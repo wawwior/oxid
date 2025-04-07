@@ -9,3 +9,4 @@ run
 .classpath
 .factorypath
 .project
+src/main/resources/natives
