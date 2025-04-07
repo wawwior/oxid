@@ -1,0 +1,30 @@
+
+{
+	"schemaVersion": 1,
+	"id": "oxid",
+	"version": "${version}",
+	"name": "Oxid",
+	"description": "rusty mod",
+	"authors": [
+		"Wawwior"
+	],
+	"contact": {
+		"sources": "https://github.com/wawwior/oxid"
+	},
+	"license": "CC0-1.0",
+	"icon": "assets/modid/icon.png",
+	"environment": "*",
+	"entrypoints": {
+		"main": [
+			"me.wawwior.oxid.Oxid"
+		]
+	},
+	"mixins": [
+		"oxid.mixins.json"
+	],
+	"depends": {
+		"fabricloader": ">=0.16.10",
+		"minecraft": "~1.21.5",
+		"java": ">=21"
+	}
+}
