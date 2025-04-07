@@ -25,8 +25,17 @@
       {
         devShell = pkgs.mkShell rec {
           buildInputs = with pkgs; [
-            rust-bin.nightly.latest.default
+            (rust-bin.selectLatestNightlyWith (
+              toolchain:
+              toolchain.default.override {
+                targets = [
+                  "aarch64-unknown-linux-gnu"
+                ];
+              }
+            ))
             rust-analyzer
+
+            gcc
 
             jdk21
             jdt-language-server

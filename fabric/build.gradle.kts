@@ -7,7 +7,6 @@ group = property("maven_group")!!
 version = property("mod_version")!!
 
 repositories {
- 
 }
 
 dependencies {
@@ -15,6 +14,7 @@ dependencies {
  mappings("net.fabricmc:yarn:${property("yarn_mappings")}:v2")
  modImplementation("net.fabricmc:fabric-loader:${property("loader_version")}")
 
+ implementation("org.scijava:native-lib-loader:2.5.0")
  // modImplementation("net.fabricmc.fabric-api:fabric-api:${property("fabric_api_version")}")
 }
 

@@ -3,4 +3,14 @@ name = "native"
 version = "0.1.0"
 edition = "2024"
 
+[lib]
+crate-type = ["cdylib"]
+
 [dependencies]
+anyhow = { version = "1.0.97"}
+jni = "0.21.1"
+macros = { version = "0.1.0", path = "../macros" }
+serde = { version = "1.0.219"}
+
+[profile.release]
+opt-level = 3
