@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import me.wawwior.oxid.jni.JNI;
+import me.wawwior.oxid.jni.JNICallback;
 import net.fabricmc.api.ModInitializer;
 
 /**
@@ -18,9 +19,9 @@ public class Oxid implements ModInitializer {
   @Override
   public void onInitialize() {
 
-    LOGGER.info("hello from oxid!");
+    LOGGER.info("Java loaded!");
 
-    JNI.INSTANCE.main();
+    JNI.INSTANCE.main(JNICallback.from(LOGGER::error, LOGGER::warn, LOGGER::info, LOGGER::debug, LOGGER::trace));
     
   }
   

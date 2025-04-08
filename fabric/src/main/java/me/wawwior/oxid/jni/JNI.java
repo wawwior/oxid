@@ -14,7 +14,7 @@ public class JNI {
   public static final JNI INSTANCE = new JNI();
 
   public JNI() {
-    if (!Platform.isLinux() | !Platform.isGNU()) throw new UnsupportedOperationException("Your OS is not supported!");
+    if (!Platform.isLinux()) throw new UnsupportedOperationException("Your OS is not supported!");
 
     try {
       NativeLoader.loadLibrary("native");
@@ -23,6 +23,6 @@ public class JNI {
     }
   }
   
-  public native void main();
+  public native void main(JNICallback callback);
   
 }
