@@ -40,24 +40,31 @@ impl ToTokens for JNIMethodAttribute {
             },
             JNIMethodType::To(to) => quote! {
                 fn #fn_name (&self, jenv: &mut JNIEnv<'a>) -> Result<#to> {
-                    use crate::util::JObjectCasters;
-                    use carte::util::JObjectInto;
+                    use carte::util::JObjectInto as _;
                     let result = jenv.call_method(&self.jobject, stringify!(#fn_name), #fn_sig, &[])?;
-                    Ok(JObjectCasters::intoj(jenv, result.into()))
+                    <#to>::intoj(jenv, result.into())
                 }
             },
             JNIMethodType::From(from) => quote! {
                 fn #fn_name (&self, jenv: &mut JNIEnv<'a>, from: #from) -> Result<()> {
-                    use crate::util::JObjectCasters;
-                    use crate::util::JObjectFrom;
-                    let jobj = &JObjectCasters::fromj(jenv, from);
+                    use crate::util::JObjectFrom as _;
+                    let jobj = &<#from>::fromj(jenv, from)?;
                     let _ = jenv.call_method(&self.jobject, stringify!(#fn_name), #fn_sig, &[
                         jobj.into()
                     ])?;
                     Ok(())
                 }
             },
-            JNIMethodType::FromTo(from, to) => quote! {},
+            JNIMethodType::FromTo(from, to) => quote! {
+                fn #fn_name (&self, jenv: &mut JNIEnv<'a>, from: #from) -> Result<#to> {
+                    use crate::util::{JObjectFrom as _, JObjectInto as _};
+                    let jobj = &<#from>::fromj(jenv, from)?;
+                    let result = jenv.call_method(&self.jobject, stringify!(#fn_name), #fn_sig, &[
+                        jobj.into()
+                    ])?;
+                    <#to>::intoj(jenv, result.into())
+                }
+            },
         });
     }
 }
@@ -106,7 +113,7 @@ impl FromMeta for JNIMethodList {
 
 #[derive(FromDeriveInput, Debug)]
 #[darling(attributes(jni_wrapper), forward_attrs)]
-struct JNIWrapperOpts {
+struct JNIWrapperDeriveOpts {
     ident: syn::Ident,
     generics: syn::Generics,
     // attrs: Vec<syn::Attribute>,
@@ -120,12 +127,10 @@ pub fn jni_wrapper_derive(tokens: TokenStream) -> TokenStream {
 }
 
 fn _jni_wrapper_derive(tokens: TokenStream) -> Result<TokenStream> {
-    let opts = JNIWrapperOpts::from_derive_input(&DeriveInput::from_input(tokens)?)
+    let opts = JNIWrapperDeriveOpts::from_derive_input(&DeriveInput::from_input(tokens)?)
         .map_err(|e| anyhow!(e.to_string()))?;
 
-    println!("{:?}", opts);
-
-    let JNIWrapperOpts {
+    let JNIWrapperDeriveOpts {
         ident,
         generics: a_t,
         // attrs,
@@ -155,4 +160,40 @@ fn _jni_wrapper_derive(tokens: TokenStream) -> Result<TokenStream> {
         }
     }
     .into())
+}
+
+#[proc_macro]
+pub fn jni_wrapper(tokens: TokenStream) -> TokenStream {
+    _jni_wrapper(tokens).unwrap()
+}
+
+fn _jni_wrapper(tokens: TokenStream) -> Result<TokenStream> {
+    rules!(tokens.into() => {
+        (name: $name:ident, sig: $sig:literal $(, methods = [])?) => {
+            Ok(quote! {
+                #[derive(JNIWrapper)]
+                #[jni_wrapper(
+                    sig = #sig,
+                    methods()
+                )]
+                struct #name <'a> {
+                    jobject: JObject<'a>,
+                }
+            }.into())
+        }
+        (name: $name:ident, sig: $sig:literal, methods: $methods:tt) => {
+            let group = if let proc_macro2::TokenTree::Group(group) = methods { Ok(group) } else { Err(anyhow!("wrong tt"))}?;
+            let inner = group.stream();
+            Ok(quote! {
+                #[derive(JNIWrapper)]
+                #[jni_wrapper(
+                    sig = #sig,
+                    methods(#inner)
+                )]
+                struct #name <'a> {
+                    jobject: JObject<'a>,
+                }
+            }.into())
+        }
+    })
 }

@@ -1,12 +1,11 @@
 use anyhow::{Result, anyhow};
 use jni::{JNIEnv, objects::JObject};
-use macros::JNIWrapper;
+use macros::{JNIWrapper, jni_wrapper};
 mod util;
 
 fn main<'local>(jenv: &mut JNIEnv<'local>, callback: JNICallback<'local>) -> Result<()> {
     tracing::info!("rust loaded!");
-
-    callback.info(jenv, "Hello :3")?;
+    callback.error(jenv, "diagnosis: :3 (terminal)")?;
 
     Ok(())
 }
@@ -30,15 +29,13 @@ fn with_result<'local>(mut jenv: JNIEnv<'local>, callback: JObject<'local>) -> R
 }
 
 jni_wrapper! {
-    name: JNIBinding,
-    sig:  "me/wawwior/oxid/jni/JNI"
-}
-
-#[derive(JNIWrapper)]
-#[jni_wrapper(
-    sig = "me/wawwior/oxid/jni/JNICallback",
-    methods(info("(Ljava/lang/String;)V", &str -> ()))
-)]
-struct JNICallback<'a> {
-    jobject: JObject<'a>,
+    name: JNICallback,
+    sig: "me/wawwior/oxid/jni/JNICallback",
+    methods: [
+        error("(Ljava/lang/String;)V", &str -> ()),
+        warn("(Ljava/lang/String;)V", &str -> ()),
+        info("(Ljava/lang/String;)V", &str -> ()),
+        debug("(Ljava/lang/String;)V", &str -> ()),
+        trace("(Ljava/lang/String;)V", &str -> ())
+    ]
 }

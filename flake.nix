@@ -19,6 +19,7 @@
         pkgs = import inputs.nixpkgs {
           inherit system;
           overlays = [ inputs.rust-overlay.overlays.default ];
+          config.allowUnsupportedSystem = true;
         };
         lib = pkgs.lib;
       in
@@ -28,19 +29,38 @@
             (rust-bin.selectLatestNightlyWith (
               toolchain:
               toolchain.default.override {
+                extensions = [
+                  "rust-src"
+                  "rust-analyzer"
+                  "llvm-tools-preview"
+                ];
                 targets = [
-                  "aarch64-unknown-linux-gnu"
+                  "x86_64-unknown-linux-gnu"
+                  "x86_64-pc-windows-msvc"
+                  "x86_64-apple-darwin"
+                  "aarch64-unknown-linux-gnu" # currently not used
+                  "aarch64-pc-windows-msvc"
+                  "aarch64-apple-darwin"
                 ];
               }
             ))
-            rust-analyzer
 
-            gcc
+            cargo-xwin
+            cargo-zigbuild
+
+            zig
+            clang
 
             jdk21
-            jdt-language-server
-            kotlin-language-server
+
             gradle
+            jdt-language-server
+
+            libGL
+            glfw-wayland-minecraft
+
+            libpulseaudio
+            openal
           ];
 
           LD_LIBRARY_PATH = "${lib.makeLibraryPath buildInputs}";
