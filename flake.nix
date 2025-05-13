@@ -45,20 +45,23 @@
               }
             ))
 
+            # cargo packages
             cargo-xwin
             cargo-zigbuild
 
+            # build dependencies
             zig
             clang
-
             jdk21
 
             gradle
+
+            # dev language server
             jdt-language-server
 
+            # to get the client to run from gradle on linux
             libGL
             glfw-wayland-minecraft
-
             libpulseaudio
             openal
           ];
